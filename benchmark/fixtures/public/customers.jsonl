@@ -1,0 +1,4 @@
+{"id":"c-00000001","name":"Zoë Boundary","email":"customer00000001@example.test","registeredAt":"2023-10-30T17:40:19.000Z","active":false}
+{"id":"c-00000002","name":"Customer 00000002","email":"customer00000002@example.test","registeredAt":"2023-06-14T17:55:52.000Z","active":true}
+{"id":"c-00000003","name":"Customer 00000003","email":"customer00000003@example.test","registeredAt":"2023-01-18T14:46:09.000Z","active":true}
+{"id":"c-00000004","name":"Customer 00000004","email":"customer00000004@example.test","registeredAt":"2020-12-15T12:45:34.000Z","active":true}

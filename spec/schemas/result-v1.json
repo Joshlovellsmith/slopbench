@@ -1,0 +1,540 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "runId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "experiment": {
+      "type": "object",
+      "properties": {
+        "benchmark": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": ["id", "version"],
+          "additionalProperties": false
+        },
+        "candidate": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "sourceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "language": {
+              "type": "string"
+            },
+            "runtime": {
+              "type": "string"
+            }
+          },
+          "required": ["id", "sourceHash", "language", "runtime"],
+          "additionalProperties": false
+        },
+        "development": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "required": ["provider", "name", "version"],
+              "additionalProperties": false
+            },
+            "harness": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "configuration": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "$ref": "#/$defs/__schema0"
+                  }
+                }
+              },
+              "required": ["name", "version"],
+              "additionalProperties": false
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "wallTimeSeconds": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "tokens": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "costUsd": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "usage": {
+              "type": "object",
+              "properties": {
+                "wallTimeSeconds": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "inputTokens": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "outputTokens": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "costUsd": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "fixture": {
+          "type": "object",
+          "properties": {
+            "schemaVersion": {
+              "type": "string",
+              "const": "1"
+            },
+            "generatorVersion": {
+              "type": "string",
+              "const": "1"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "counts": {
+              "type": "object",
+              "properties": {
+                "products": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "customers": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["products", "customers"],
+              "additionalProperties": false
+            },
+            "files": {
+              "type": "object",
+              "properties": {
+                "products.jsonl": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "customers.jsonl": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": ["products.jsonl", "customers.jsonl"],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "generatorVersion",
+            "seed",
+            "counts",
+            "files"
+          ],
+          "additionalProperties": false
+        },
+        "environment": {
+          "type": "object",
+          "properties": {
+            "platform": {
+              "type": "string"
+            },
+            "kernelRelease": {
+              "type": "string"
+            },
+            "cpuModel": {
+              "type": "string"
+            },
+            "logicalCpuCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "hostMemoryBytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "architecture": {
+              "type": "string"
+            },
+            "controllerRuntime": {
+              "type": "string"
+            },
+            "dockerVersion": {
+              "type": "string"
+            },
+            "image": {
+              "type": "string"
+            },
+            "imageId": {
+              "type": "string"
+            },
+            "cpuLimit": {
+              "type": "number",
+              "minimum": 0
+            },
+            "memoryLimitBytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "executionTimeoutMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "readinessTimeoutMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "buildTimeoutMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "buildNetwork": {
+              "type": "string",
+              "enum": ["none", "default"]
+            }
+          },
+          "required": [
+            "platform",
+            "architecture",
+            "controllerRuntime",
+            "image",
+            "cpuLimit",
+            "memoryLimitBytes",
+            "executionTimeoutMs",
+            "readinessTimeoutMs",
+            "buildTimeoutMs",
+            "buildNetwork"
+          ],
+          "additionalProperties": false
+        },
+        "suite": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": ["id", "version"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "benchmark",
+        "candidate",
+        "development",
+        "fixture",
+        "environment",
+        "suite"
+      ],
+      "additionalProperties": false
+    },
+    "status": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "type": "string",
+              "const": "passed"
+            }
+          },
+          "required": ["state"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "type": "string",
+              "const": "failed"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "build_failure",
+                "startup_failure",
+                "infrastructure_failure",
+                "timeout",
+                "test_assertion_failure",
+                "candidate_runtime_failure",
+                "resource_limit_violation"
+              ]
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": ["state", "kind", "message"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "passed"
+              },
+              "name": {
+                "type": "string"
+              },
+              "latencyMs": {
+                "type": "number",
+                "minimum": 0
+              },
+              "httpStatus": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["status", "name", "latencyMs", "httpStatus"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "failed"
+              },
+              "name": {
+                "type": "string"
+              },
+              "latencyMs": {
+                "type": "number",
+                "minimum": 0
+              },
+              "httpStatus": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["status", "name", "message"],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "correctness": {
+      "type": "object",
+      "properties": {
+        "passed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["passed", "failed"],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "latencyMs": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "number",
+              "minimum": 0
+            },
+            "median": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": ["min", "median", "max"],
+          "additionalProperties": false
+        },
+        "throughputRequestsPerSecond": {
+          "type": "number",
+          "minimum": 0
+        },
+        "peakMemoryBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cpuTimeSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cpuUtilizationRatio": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "container": {
+      "type": "object",
+      "properties": {
+        "exitCode": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "oomKilled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "stdout": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "buildLog": {
+          "type": "string"
+        }
+      },
+      "required": ["stdout", "stderr", "buildLog"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "runId",
+    "startedAt",
+    "finishedAt",
+    "experiment",
+    "status",
+    "tests",
+    "correctness",
+    "metrics",
+    "container",
+    "artifacts"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      ]
+    }
+  }
+}

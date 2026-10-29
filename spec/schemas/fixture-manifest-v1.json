@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "generatorVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "products": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "customers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["products", "customers"],
+      "additionalProperties": false
+    },
+    "files": {
+      "type": "object",
+      "properties": {
+        "products.jsonl": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "customers.jsonl": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": ["products.jsonl", "customers.jsonl"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["schemaVersion", "generatorVersion", "seed", "counts", "files"],
+  "additionalProperties": false
+}

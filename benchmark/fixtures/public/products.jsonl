@@ -1,0 +1,12 @@
+{"id":"p-00000001","sku":"SKU-00000001","name":"Boundary product: café ☕","category":"electronics","priceMinor":0,"inventory":0,"status":"discontinued","popularityWeight":1000000}
+{"id":"p-00000002","sku":"SKU-00000002","name":"Product 00000002","category":"clothing","priceMinor":99999999,"inventory":178,"status":"active","popularityWeight":500000}
+{"id":"p-00000003","sku":"SKU-00000003","name":"Product 00000003","category":"clothing","priceMinor":6430,"inventory":190,"status":"active","popularityWeight":333333}
+{"id":"p-00000004","sku":"SKU-00000004","name":"Product 00000004","category":"clothing","priceMinor":55544,"inventory":82,"status":"active","popularityWeight":250000}
+{"id":"p-00000005","sku":"SKU-00000005","name":"Product 00000005","category":"clothing","priceMinor":13321,"inventory":86,"status":"active","popularityWeight":200000}
+{"id":"p-00000006","sku":"SKU-00000006","name":"Product 00000006","category":"clothing","priceMinor":75379,"inventory":82,"status":"active","popularityWeight":166666}
+{"id":"p-00000007","sku":"SKU-00000007","name":"Product 00000007","category":"clothing","priceMinor":90557,"inventory":86,"status":"active","popularityWeight":142857}
+{"id":"p-00000008","sku":"SKU-00000008","name":"Product 00000008","category":"clothing","priceMinor":4528,"inventory":66,"status":"active","popularityWeight":125000}
+{"id":"p-00000009","sku":"SKU-00000009","name":"Product 00000009","category":"clothing","priceMinor":356,"inventory":118,"status":"active","popularityWeight":111111}
+{"id":"p-00000010","sku":"SKU-00000010","name":"Product 00000010","category":"clothing","priceMinor":4994,"inventory":186,"status":"active","popularityWeight":100000}
+{"id":"p-00000011","sku":"SKU-00000011","name":"Product 00000011","category":"clothing","priceMinor":32346,"inventory":30,"status":"active","popularityWeight":90909}
+{"id":"p-00000012","sku":"SKU-00000012","name":"Product 00000012","category":"clothing","priceMinor":8546,"inventory":10,"status":"active","popularityWeight":83333}

@@ -1,0 +1,376 @@
+{
+  "schemaVersion": "1",
+  "contractVersion": "0.1.0",
+  "algorithm": "slop-counter32-v1",
+  "randomWords": [
+    {
+      "seed": 0,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 0,
+      "word": 4265067157
+    },
+    {
+      "seed": 1,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 0,
+      "word": 3014642896
+    },
+    {
+      "seed": 2,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 0,
+      "word": 2046853595
+    },
+    {
+      "seed": 2,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 1,
+      "word": 1435501105
+    },
+    {
+      "seed": 12345,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 0,
+      "word": 1571708659
+    },
+    {
+      "seed": 4294967295,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 0,
+      "word": 15330723
+    },
+    {
+      "seed": 12345,
+      "productOrdinal": 1,
+      "scenario": 0,
+      "day": 0,
+      "word": 714083592
+    },
+    {
+      "seed": 12345,
+      "productOrdinal": 0,
+      "scenario": 1,
+      "day": 0,
+      "word": 1758859239
+    },
+    {
+      "seed": 12345,
+      "productOrdinal": 0,
+      "scenario": 0,
+      "day": 1,
+      "word": 3646659868
+    },
+    {
+      "seed": 4294967295,
+      "productOrdinal": 1023,
+      "scenario": 999999,
+      "day": 3649,
+      "word": 3271514754
+    }
+  ],
+  "cases": [
+    {
+      "name": "profile-small",
+      "input": {
+        "seed": 12345,
+        "days": 4,
+        "scenarios": 3,
+        "products": [
+          {
+            "productId": "p-00000002",
+            "initialStock": 40,
+            "demandMax": 17,
+            "reorderPoint": 12,
+            "replenishmentQuantity": 50,
+            "leadDays": 3
+          },
+          {
+            "productId": "p-00000003",
+            "initialStock": 40,
+            "demandMax": 17,
+            "reorderPoint": 12,
+            "replenishmentQuantity": 50,
+            "leadDays": 3
+          }
+        ]
+      },
+      "expected": {
+        "seed": 12345,
+        "days": 4,
+        "scenarios": 3,
+        "logicalProductDays": 24,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 130,
+            "soldUnits": 117,
+            "lostUnits": 13,
+            "replenishedUnits": 0,
+            "stockoutDays": 2,
+            "endingStockUnitsSum": 3,
+            "meanEndingStockMilli": 1000,
+            "fillRateBps": 9000
+          },
+          {
+            "productId": "p-00000003",
+            "demandedUnits": 84,
+            "soldUnits": 84,
+            "lostUnits": 0,
+            "replenishedUnits": 0,
+            "stockoutDays": 0,
+            "endingStockUnitsSum": 36,
+            "meanEndingStockMilli": 12000,
+            "fillRateBps": 10000
+          }
+        ]
+      }
+    },
+    {
+      "name": "zero-demand",
+      "input": {
+        "seed": 0,
+        "days": 2,
+        "scenarios": 2,
+        "products": [
+          {
+            "productId": "p-00000002",
+            "initialStock": 3,
+            "demandMax": 0,
+            "reorderPoint": 0,
+            "replenishmentQuantity": 0,
+            "leadDays": 1
+          }
+        ]
+      },
+      "expected": {
+        "seed": 0,
+        "days": 2,
+        "scenarios": 2,
+        "logicalProductDays": 4,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 0,
+            "soldUnits": 0,
+            "lostUnits": 0,
+            "replenishedUnits": 0,
+            "stockoutDays": 0,
+            "endingStockUnitsSum": 6,
+            "meanEndingStockMilli": 3000,
+            "fillRateBps": 10000
+          }
+        ]
+      }
+    },
+    {
+      "name": "day-one-arrival",
+      "input": {
+        "seed": 2,
+        "days": 2,
+        "scenarios": 1,
+        "products": [
+          {
+            "productId": "p-00000002",
+            "initialStock": 0,
+            "demandMax": 1,
+            "reorderPoint": 0,
+            "replenishmentQuantity": 1,
+            "leadDays": 1
+          }
+        ]
+      },
+      "expected": {
+        "seed": 2,
+        "days": 2,
+        "scenarios": 1,
+        "logicalProductDays": 2,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 2,
+            "soldUnits": 1,
+            "lostUnits": 1,
+            "replenishedUnits": 1,
+            "stockoutDays": 1,
+            "endingStockUnitsSum": 0,
+            "meanEndingStockMilli": 0,
+            "fillRateBps": 5000
+          }
+        ]
+      }
+    },
+    {
+      "name": "two-products",
+      "input": {
+        "seed": 12345,
+        "days": 4,
+        "scenarios": 3,
+        "products": [
+          {
+            "productId": "p-00000003",
+            "initialStock": 2,
+            "demandMax": 2,
+            "reorderPoint": 1,
+            "replenishmentQuantity": 2,
+            "leadDays": 2
+          },
+          {
+            "productId": "p-00000002",
+            "initialStock": 0,
+            "demandMax": 3,
+            "reorderPoint": 0,
+            "replenishmentQuantity": 3,
+            "leadDays": 1
+          }
+        ]
+      },
+      "expected": {
+        "seed": 12345,
+        "days": 4,
+        "scenarios": 3,
+        "logicalProductDays": 24,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 16,
+            "soldUnits": 7,
+            "lostUnits": 9,
+            "replenishedUnits": 9,
+            "stockoutDays": 5,
+            "endingStockUnitsSum": 2,
+            "meanEndingStockMilli": 667,
+            "fillRateBps": 4375
+          },
+          {
+            "productId": "p-00000003",
+            "demandedUnits": 12,
+            "soldUnits": 8,
+            "lostUnits": 4,
+            "replenishedUnits": 2,
+            "stockoutDays": 4,
+            "endingStockUnitsSum": 0,
+            "meanEndingStockMilli": 0,
+            "fillRateBps": 6667
+          }
+        ]
+      }
+    },
+    {
+      "name": "unsigned-boundaries",
+      "input": {
+        "seed": 4294967295,
+        "days": 5,
+        "scenarios": 7,
+        "products": [
+          {
+            "productId": "p-00000002",
+            "initialStock": 1,
+            "demandMax": 17,
+            "reorderPoint": 0,
+            "replenishmentQuantity": 5,
+            "leadDays": 3
+          }
+        ]
+      },
+      "expected": {
+        "seed": 4294967295,
+        "days": 5,
+        "scenarios": 7,
+        "logicalProductDays": 35,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 301,
+            "soldUnits": 33,
+            "lostUnits": 268,
+            "replenishedUnits": 35,
+            "stockoutDays": 31,
+            "endingStockUnitsSum": 9,
+            "meanEndingStockMilli": 1286,
+            "fillRateBps": 1096
+          }
+        ]
+      }
+    },
+    {
+      "name": "safe-rounding",
+      "input": {
+        "seed": 7,
+        "days": 1,
+        "scenarios": 100000,
+        "products": [
+          {
+            "productId": "p-00000002",
+            "initialStock": 999999999,
+            "demandMax": 0,
+            "reorderPoint": 0,
+            "replenishmentQuantity": 0,
+            "leadDays": 1
+          }
+        ]
+      },
+      "expected": {
+        "seed": 7,
+        "days": 1,
+        "scenarios": 100000,
+        "logicalProductDays": 100000,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 0,
+            "soldUnits": 0,
+            "lostUnits": 0,
+            "replenishedUnits": 0,
+            "stockoutDays": 0,
+            "endingStockUnitsSum": 99999999900000,
+            "meanEndingStockMilli": 999999999000,
+            "fillRateBps": 10000
+          }
+        ]
+      }
+    },
+    {
+      "name": "half-up-tie",
+      "input": {
+        "seed": 1,
+        "days": 1,
+        "scenarios": 16,
+        "products": [
+          {
+            "productId": "p-00000002",
+            "initialStock": 1,
+            "demandMax": 1,
+            "reorderPoint": 0,
+            "replenishmentQuantity": 0,
+            "leadDays": 1
+          }
+        ]
+      },
+      "expected": {
+        "seed": 1,
+        "days": 1,
+        "scenarios": 16,
+        "logicalProductDays": 16,
+        "items": [
+          {
+            "productId": "p-00000002",
+            "demandedUnits": 7,
+            "soldUnits": 7,
+            "lostUnits": 0,
+            "replenishedUnits": 0,
+            "stockoutDays": 0,
+            "endingStockUnitsSum": 9,
+            "meanEndingStockMilli": 563,
+            "fillRateBps": 10000
+          }
+        ]
+      }
+    }
+  ]
+}

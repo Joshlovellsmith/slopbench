@@ -1,0 +1,130 @@
+{
+  "GEN-001": {
+    "privatePlan": "Invalid UTF-8, duplicate keys, surrogate escapes, numeric boundary spellings and exact UTC calendar cases across every request body.",
+    "workloads": ["PERF-ORD", "PERF-SIM"]
+  },
+  "GEN-002": {
+    "privatePlan": "Inject commit/disk/busy failures and check error envelope plus absence of effects; distinguish disconnect uncertainty.",
+    "workloads": ["PERF-INV", "PERF-ORD", "PERF-IMP"]
+  },
+  "GEN-003": {
+    "privatePlan": "Chunked input at each size boundary, malformed percent encoding, duplicated query keys and media/charset variants.",
+    "workloads": ["PERF-CAT", "PERF-IMP"]
+  },
+  "GEN-004": {
+    "privatePlan": "Cross-error priority matrices and controlled overlapping reader/writer schedules; no dirty/partial snapshot.",
+    "workloads": ["PERF-INV", "PERF-ORD", "PERF-IMP"]
+  },
+  "GEN-005": {
+    "privatePlan": "All wrong methods, route casing/trailing slashes, readiness during initialization and unavailable storage.",
+    "workloads": ["PERF-CAT"]
+  },
+  "DATA-001": {
+    "privatePlan": "Alternate valid seeds/counts including zero; audit immutable mounts and references. Controller may verify SQLite header/integrity without assuming table names or inspecting candidate source.",
+    "workloads": ["PERF-CAT", "PERF-IMP"]
+  },
+  "DATA-002": {
+    "privatePlan": "Restart with same database, failed initialization and changed fixture manifest; assert startup rejection without rewriting committed state.",
+    "workloads": ["PERF-ORD", "PERF-IMP"]
+  },
+  "CAT-001": {
+    "privatePlan": "All offset/limit boundaries, pagination over snapshot and empty fixture; concurrent inserts under documented cross-page semantics.",
+    "workloads": ["PERF-CAT"]
+  },
+  "CAT-002": {
+    "privatePlan": "Intersect filters with zero/equal endpoints, all categories and active/discontinued distributions.",
+    "workloads": ["PERF-CAT"]
+  },
+  "CAT-003": {
+    "privatePlan": "Large equal-key groups, numeric/string comparisons and descending primary with ascending secondary ID.",
+    "workloads": ["PERF-CAT"]
+  },
+  "CAT-004": {
+    "privatePlan": "Imported/discontinued and absent IDs; reads before/after committed inventory changes.",
+    "workloads": ["PERF-CAT", "PERF-INV"]
+  },
+  "INV-001": {
+    "privatePlan": "Missing/discontinued IDs, snapshot reads during writes, read consistency with catalogue.",
+    "workloads": ["PERF-INV"]
+  },
+  "INV-002": {
+    "privatePlan": "Upper/lower/zero bounds, failed commit and arithmetic overflow attempts; unchanged stock on all failures.",
+    "workloads": ["PERF-INV"]
+  },
+  "INV-003": {
+    "privatePlan": "Competing positive/negative adjustments and order writes; reconcile every success against final stock.",
+    "workloads": ["PERF-INV", "PERF-ORD"]
+  },
+  "ORD-001": {
+    "privatePlan": "Maximum line/quantity counts, duplicate products with different quantities, exact line ordering/Location and temporal forms.",
+    "workloads": ["PERF-ORD"]
+  },
+  "ORD-002": {
+    "privatePlan": "Sorted reference failure priority across multiple missing/inactive products and customer/duplicate-ID precedence.",
+    "workloads": ["PERF-ORD"]
+  },
+  "ORD-003": {
+    "privatePlan": "Zero/high prices and totals at/above MAX_SAFE using independently computed integer ledger.",
+    "workloads": ["PERF-ORD", "PERF-ANA"]
+  },
+  "ORD-004": {
+    "privatePlan": "Late item failure, concurrent multi-product lock ordering, commit failure and reader snapshot isolation.",
+    "workloads": ["PERF-ORD", "PERF-INV"]
+  },
+  "ORD-005": {
+    "privatePlan": "Duplicate IDs with changed payload, concurrent identical IDs, restart persistence and uncertain-response reconciliation.",
+    "workloads": ["PERF-ORD"]
+  },
+  "ANA-001": {
+    "privatePlan": "Every timestamp boundary, invalid calendar date, snapshot overlap with writes and aggregate overflow.",
+    "workloads": ["PERF-ANA"]
+  },
+  "ANA-002": {
+    "privatePlan": "Multiple historical lines/groups, zero revenue, no phantom failed orders and exact category snapshots.",
+    "workloads": ["PERF-ANA"]
+  },
+  "ANA-003": {
+    "privatePlan": "Quantity/revenue/ID tie hierarchy, all limits, empty database/window and mixed write freshness.",
+    "workloads": ["PERF-ANA"]
+  },
+  "IMP-001": {
+    "privatePlan": "2 GiB wire, 2 million rows, exact 4096-byte line limits, every UTF-8 chunk split, CRLF, absent final LF and memory growth.",
+    "workloads": ["PERF-IMP"]
+  },
+  "IMP-002": {
+    "privatePlan": "Each Product bound, missing/null/extra fields, Unicode scalar lengths and first invalid physical line.",
+    "workloads": ["PERF-IMP"]
+  },
+  "IMP-003": {
+    "privatePlan": "Disconnect before EOF, late storage failure and readers during staged import; no partial records after rollback.",
+    "workloads": ["PERF-IMP"]
+  },
+  "IMP-004": {
+    "privatePlan": "Concurrent overlapping ID/SKU sets and retry after lost success response, with no duplicate rows.",
+    "workloads": ["PERF-IMP"]
+  },
+  "SIM-001": {
+    "privatePlan": "Every dimension/input bound, exact 4-billion operation cap and sorted missing-reference priority.",
+    "workloads": ["PERF-SIM"]
+  },
+  "SIM-002": {
+    "privatePlan": "Independent cross-language random-word vectors including unsigned high bits, all coordinate axes and nonzero modulo cases.",
+    "workloads": ["PERF-SIM"]
+  },
+  "SIM-003": {
+    "privatePlan": "Lead-time/reorder timing, single outstanding delivery, final-day pending events, stockout definition and demand conservation.",
+    "workloads": ["PERF-SIM"]
+  },
+  "SIM-004": {
+    "privatePlan": "Exact half-up ties, zero demand, high intermediate integer products and deterministic parallel reductions.",
+    "workloads": ["PERF-SIM"]
+  },
+  "SIM-005": {
+    "privatePlan": "Repeat/concurrent/permuted requests while stock changes; prove explicit simulation state and no persistent mutation.",
+    "workloads": ["PERF-SIM"]
+  },
+  "SIM-006": {
+    "privatePlan": "Verify Medium/Large results independently outside timed phase; observe scaling without storing per-day objects.",
+    "workloads": ["PERF-SIM"]
+  }
+}

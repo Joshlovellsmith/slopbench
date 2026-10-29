@@ -1,0 +1,479 @@
+# SlopShop Round 0, contract 0.1.0
+
+Benchmark identity `slopshop-round-00`, suite `round-00-public` version `0.1.0`.
+This specification and OpenAPI 3.1.1 document define the public contract together.
+The specification defines cross-field, concurrency, arithmetic and streaming rules
+that schemas cannot express. A contradiction is a specification defect, not
+permission to choose either behavior. Requirement identifiers remain stable;
+incompatible published changes require a new contract version.
+
+MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are normative requirement keywords.
+No storage schema, framework, dependency manager or programming language is
+prescribed. HTTP/JSON and durable SQLite storage are required.
+
+## Common protocol
+
+### GEN-001 — Wire values
+
+Application/json messages MUST be UTF-8 without BOM, one complete value, with unique object keys,
+valid Unicode scalar strings and no NaN/infinities. NDJSON uses IMP-001 framing;
+each record independently obeys these JSON-value rules. Unknown object properties,
+missing required fields and explicit null MUST be rejected unless expressly
+allowed by the schema. Object-key order and insignificant whitespace do not
+matter. Object member names are case-sensitive decoded scalar sequences; escaped
+spellings of the same key are duplicates, without Unicode normalization. Arrays
+are ordered. No success field is nullable. Error `line` is the
+only nullable field. Requests MUST NOT depend on system time or locale.
+
+Numbers are JSON numbers, never numeric strings. To make parser differences
+explicit, a JSON numeric token is interpreted by correctly rounded IEEE 754
+binary64 conversion (round-to-nearest, ties-to-even), then checked for finiteness,
+integrality and bounds. Thus `1`, `1.0`, and `1e0` are equivalent; `-0` is zero.
+A very long decimal fractional token that rounds to an integer has that integer's
+meaning. Strings such as `"1"` are not numbers. NaN/Infinity literal tokens are
+INVALID_JSON; a syntactically valid numeric token that overflows binary64
+(e.g. 1e309) is VALIDATION_ERROR, never an accepted infinity. Responses MUST contain finite
+integer-valued numbers within ±9,007,199,254,740,991 (`MAX_SAFE`); any legal JSON
+numeric spelling of that value is allowed. All business/simulation arithmetic
+is subsequently defined over exact mathematical integers. Implementations MUST
+produce those values without approximation; no particular internal numeric type
+is prescribed, but every operation must be exact or use an exact decomposition.
+
+ASCII identifier/SKU/category comparisons use unsigned UTF-8 byte lexicographic
+order (case-sensitive, no locale collation). All displayed field regexes are whole-string matches, never substring searches.
+Names preserve scalar sequences;
+no trimming or Unicode normalization. String lengths count Unicode scalar values.
+Timestamps MUST be real Gregorian UTC dates in exactly
+`YYYY-MM-DDTHH:mm:ss.SSSZ`, from `2000-01-01T00:00:00.000Z` inclusive to
+`2100-01-01T00:00:00.000Z` exclusive. No leap seconds, offsets or reduced precision.
+
+### GEN-002 — Errors
+
+Every specified error MUST use `application/json` and exactly
+`{"error":{"code":"CODE","message":"nonempty diagnostic","line":null}}`.
+For import record errors, `line` is the 1-based physical line number instead.
+Non-null line is used only for import INVALID_JSON, VALIDATION_ERROR,
+IMPORT_CONFLICT and record/line INPUT_LIMIT. Storage/commit failures and total
+body-byte limits always use null, even during an import.
+Messages are diagnostic, not stable strings. No stack traces, SQL text or host
+paths SHOULD be exposed. The following status/code pairs are normative:
+
+| Status | Code | Trigger |
+| --- | --- | --- |
+| 400 | INVALID_JSON | Malformed JSON, duplicate keys, bad UTF-8/scalars or BOM |
+| 400 | VALIDATION_ERROR | Schema, query, path, date or cross-field violation |
+| 404 | NOT_FOUND | Unknown route |
+| 404 | PRODUCT_NOT_FOUND / CUSTOMER_NOT_FOUND / ORDER_NOT_FOUND | Missing reference/resource |
+| 405 | METHOD_NOT_ALLOWED | Known route, unsupported method (Allow MUST list its methods) |
+| 409 | INSUFFICIENT_STOCK / INVENTORY_LIMIT | Negative or >1,000,000,000 resulting inventory |
+| 409 | PRODUCT_INACTIVE / CUSTOMER_INACTIVE | Order references an inactive entity |
+| 409 | ORDER_EXISTS / IMPORT_CONFLICT | Duplicate order ID / product ID or SKU |
+| 409 | NUMERIC_LIMIT | Exact monetary/aggregate result exceeds MAX_SAFE |
+| 413 | INPUT_LIMIT | Body, record-count or line-size limit |
+| 415 | UNSUPPORTED_MEDIA_TYPE | Unsupported Content-Type or Content-Encoding |
+| 503 | STORAGE_UNAVAILABLE | SQLite busy/locked after bounded retry, full disk, I/O/commit failure |
+
+A failed mutation MUST leave no visible partial mutation. A connection loss does
+not prove failure: if commit completed the operation may persist. Retry orders
+using their same ID and reconcile with GET; a 409 is not proof of failed commit.
+A 503 generated by the application MUST mean no effects committed. Internal
+programming failures MAY return 500 using code INTERNAL_ERROR and the same envelope;
+500 is never a valid response to an otherwise supported correct operation.
+
+### GEN-003 — Sizes, media and queries
+
+HTTP/1.1 MUST be supported; HTTP/2 is optional and not benchmarked. The evaluator
+sends request targets at most 8192 bytes and header blocks at most 16384 bytes;
+candidates MUST support those sizes. Malformed HTTP framing and larger transport
+envelopes are outside this application contract and MAY be rejected by the HTTP
+server (including 414/431 without this JSON envelope).
+
+For supported POST operations, non-import request bodies MUST be supported up to 1,048,576 bytes and MUST fail
+413 above that limit. Required JSON request bodies use `application/json`, with
+optional `charset=utf-8` (media type/charset case-insensitive). Quoted UTF-8 charset values and optional whitespace
+are accepted; other/repeated parameters fail 415. Other encodings,
+compression or content types fail 415. Content-Encoding absent or `identity` is
+accepted. Import has its own larger limits below. Chunked requests without
+Content-Length MUST work. Body media/encoding/size rules apply to these supported
+POSTs; GET body contents and entity headers are ignored. `Accept` does not change representations; no auth,
+redirects, compression, CORS or TLS behavior is benchmarked.
+
+Unknown/duplicate query keys, empty values, arrays, malformed percent/UTF-8
+encoding and unrecognized enum/boolean values MUST fail 400 VALIDATION_ERROR.
+Numeric query values MUST match `0|[1-9][0-9]*` before bounds checking (no signs,
+spaces, decimals, exponents or leading zeros). Booleans are exactly `true`/`false`.
+All endpoints reject query keys not explicitly defined for that endpoint.
+
+### GEN-004 — Validation priority and concurrency
+
+For a request with multiple problems the following precedence MUST apply:
+route then method, supported media, observed input-size limit, JSON decoding,
+shape/field/cross-field validation, then endpoint-specific semantic checks.
+Within structural validation any invalid field may be reported; the code is the
+same. Bodies on GET are ignored and SHOULD NOT be sent. For an import, the first
+invalid record in stream order is reported; processing MAY stop on that error
+without reading the remaining body (including an as-yet-unobserved size excess).
+
+Each successful mutation MUST have a single durable commit/linearization point
+before the success response. Concurrent mutations MUST be equivalent to some
+serial order consistent with completed-before-started requests. Reads and each
+multi-row response MUST observe one committed snapshot, never dirty/partial
+writes. Readers MAY see old or new committed state during concurrent mutations.
+No success is allowed to acknowledge a failed commit. SQLITE_BUSY is retried for
+at most 5 seconds then mapped to 503; the benchmark sends at most 16 competing
+writers in functional tests. The 5-second bound excludes the time required to
+receive an import body. Candidates MAY use SQLite WAL or another SQLite mode.
+
+### GEN-005 — Routes and readiness
+
+Paths are case-sensitive, with no trailing-slash aliases. Split the path on
+literal `/`, then percent-decode each segment exactly once as UTF-8; malformed
+escapes/UTF-8 or a decoded slash in a segment fail 400 VALIDATION_ERROR during
+routing. Query names/values are percent-decoded once before duplicate/field checks
+(`+` decodes to space). Unmatched paths return
+404; unsupported methods on a known route return 405 with Allow. Implementations
+MAY support HEAD/OPTIONS additionally; these are not benchmarked. `GET /health`
+MUST return 200 JSON exactly `{"status":"ok"}` when initialization is complete and
+the bound SQLite database can read committed state. Read-unavailable storage
+returns 503 STORAGE_UNAVAILABLE. Before initialization completes, candidates MAY
+keep the listener closed or return 503; they MUST NOT return readiness 200.
+Write-only fault injection need not make read readiness fail.
+No customer-list or mutation endpoint, cancellation, taxes, discounts,
+reservations, idempotency header or future-round behavior is in Round 0.
+
+## Data and startup
+
+### DATA-001 — Canonical entities and fixture boundary
+
+Use Milestone 1 fixture schema/generator v1, unchanged JSONL plus manifest.
+Products retain exactly `id`, `sku`, `name`, `category`, `priceMinor`, `inventory`,
+`status`, `popularityWeight`. Customer fields retain their v1 meaning.
+Round 0-supported product constraints are: ID `p-[0-9]{8}`, SKU
+`[A-Z0-9][A-Z0-9-]{0,63}`, name 1..200 scalars, category one of books/home/
+electronics/clothing, priceMinor and inventory 0..1,000,000,000, status active or
+discontinued, popularityWeight 1..1,000,000. ID and SKU are unique independently.
+Customer IDs are `c-[0-9]{8}`; active is the existing fixture boolean. Fixtures
+provided to candidates MUST satisfy these tighter Round 0 bounds; candidates do
+not generate fixtures. Orders reference customers and products; immutable line
+snapshots contain product ID, category, unit price and quantity.
+
+Immutable benchmark fixtures reside in `FIXTURE_DIR`. Public examples and private
+evaluation datasets use the same versioned format but different manifests; test
+logic is never an input mount. A candidate owns only its mutable SQLite database
+at `DATABASE_PATH`. It MUST NOT modify input fixture files. No predetermined
+SQLite tables, columns or index names are required.
+
+### DATA-002 — Initialization and persistence
+
+At every startup, candidates MUST validate the supplied manifest and file hashes
+before becoming ready. On an absent database, candidates MUST validate records, load
+products and customers once, and start with zero orders. Empty fixture files
+with zero counts are valid. Failed initialization MUST NOT become ready or leave
+a database treated as initialized. On restart with an initialized database,
+candidates MUST preserve all committed state and MUST NOT reload/overwrite it.
+A database is bound to its initial fixture manifest: compare schemaVersion,
+generatorVersion, seed, counts and both file hashes as parsed values, ignoring
+manifest whitespace/key order. Any changed value on restart MUST fail startup
+without mutating the database. An existing uninitialized database after failed
+initialization MAY be safely retried or rejected, but MUST NOT serve partial data;
+a previously initialized incompatible/corrupt database MUST NOT be silently reset. No reset HTTP endpoint is required.
+The public example is seed 12345, 12 products, 4 customers, generated using the
+existing generator; the zero fixture uses the same seed and zero/zero counts.
+
+## Catalogue
+
+### CAT-001 — Pagination
+
+`GET /products` returns exactly `{items:[Product],total,limit,offset}`. Defaults:
+limit 20, offset 0. limit 1..1000; offset 0..1,000,000,000. `total` counts all
+matching records before pagination, including discontinued products unless
+filtered. No matches/out-of-range offset gives items `[]`, retaining total and
+echoing normalized limit/offset. Pagination is offset-based over one snapshot;
+across separate requests concurrent writes can shift pages (no cursor snapshot).
+
+### CAT-002 — Filters
+
+Optional `category`, `minPrice`, `maxPrice`, `active` combine with AND. Price
+bounds are inclusive, 0..1,000,000,000. minPrice>maxPrice is 400. active=true means
+status=active; false means discontinued. Omission includes both. Category values
+are the four exact strings above. Zero prices are real values, not missing.
+
+### CAT-003 — Sorting
+
+`sort` is id (default), sku, priceMinor or inventory. `direction` is asc (default)
+or desc. Sort by that primary value in the requested direction, then ID ascending
+regardless of direction. ID as primary is just ordered in the requested direction.
+Names are not sortable, avoiding locale/collation ambiguity. Numeric sorts are
+numeric, not textual. Supporting an index does not permit changing semantics.
+
+### CAT-004 — Individual product
+
+`GET /products/{productId}` returns the complete Product object with current
+inventory. A malformed ID is 400; a well-formed absent ID is 404 PRODUCT_NOT_FOUND.
+Discontinued products remain retrievable. Product metadata is immutable after
+creation; only inventory may change in Round 0.
+
+## Inventory
+
+### INV-001 — Read
+
+`GET /inventory/{productId}` returns exactly `{productId,quantity}` with current
+inventory. Missing/malformed IDs use the product errors above, including for
+inactive products.
+
+### INV-002 — Adjustment
+
+`POST /inventory/{productId}/adjustments` receives exactly `{delta}`; delta is
+an integer in [-1,000,000,000,1,000,000,000], including zero. It returns 200
+`{productId,quantity}` after atomic read-modify-write. New quantity <0 yields
+409 INSUFFICIENT_STOCK; >1,000,000,000 yields 409 INVENTORY_LIMIT. Discontinued
+products MUST be adjustable using these same rules. A failed mutation leaves inventory unchanged.
+
+### INV-003 — Competing adjustments
+
+Concurrent adjustments MUST NOT lose updates, permit negative stock or apply a
+failed request's delta. With stock 5 and ten parallel delta=-1 requests on an
+otherwise idle healthy database, exactly five succeed, five return 409
+INSUFFICIENT_STOCK and final stock is zero. After success, both catalogue and
+inventory reads must agree. Resource-injected 503 is tested separately.
+
+## Orders
+
+### ORD-001 — Creation and representation
+
+`POST /orders` receives exactly `{id,customerId,orderedAt,items}`. ID matches
+`o-[A-Za-z0-9_-]{1,48}`; customer ID uses c-eight-digits. items has 1..100 objects
+exactly `{productId,quantity}` with quantity 1..1,000,000. Duplicate product IDs
+are structurally invalid (400), not merged. Success is 201 with the Order object
+and `Location: /orders/{id}`. Order contains id/customerId/orderedAt,
+`status:"confirmed"`, items sorted by product ID, and totalMinor. Each returned
+line has productId, category, quantity, unitPriceMinor and lineTotalMinor.
+No response timestamps are generated from wall time.
+
+### ORD-002 — Semantic validation
+
+After structural validation, check in order: existing order ID (409 ORDER_EXISTS),
+customer existence (404 CUSTOMER_NOT_FOUND), customer active (409 CUSTOMER_INACTIVE),
+then product existence/active in ascending product-ID order (404 PRODUCT_NOT_FOUND
+or 409 PRODUCT_INACTIVE for the first failing product), then numeric bounds,
+then sufficient inventory in ascending product-ID order. All references MUST be
+validated before stock is changed. Customer registration time is not an ordering
+constraint; orderedAt may precede registration. Inactive/discontinued records are
+explicit fixture edge cases, not missing entities.
+
+### ORD-003 — Exact monetary arithmetic
+
+unitPriceMinor is the product's committed price at creation; lineTotalMinor is
+unitPriceMinor*quantity; totalMinor is the exact sum of line totals. No discounts,
+shipping, tax or currency conversion. Zero-price active products are valid.
+Any line/total >MAX_SAFE is 409 NUMERIC_LIMIT. Calculate/check before mutation.
+No floating rounding, decimal prices or wrapping integer arithmetic is allowed.
+
+### ORD-004 — Atomicity and concurrency
+
+Order insertion, all lines, and all inventory decrements MUST commit atomically.
+Any validation, stock, persistence or commit failure leaves no order/lines and
+no decrements. A rejected order's ID remains available (unless another concurrent
+request successfully created it). Competing orders/adjustments on the same stock
+MUST preserve serial semantics; no overselling. GET and analytics cannot see
+partially created orders. Imported products participate in the same transactions.
+
+### ORD-005 — Retrieval, duplicates and durability
+
+`GET /orders/{orderId}` returns the committed Order; absent is 404 ORDER_NOT_FOUND,
+malformed ID is 400. A repeated successful ID returns 409 ORDER_EXISTS without
+any further decrement, even if its otherwise valid payload differs. Concurrent
+requests with the same ID produce exactly one 201 and the rest 409 ORDER_EXISTS.
+These statements assume a healthy database without injected resource failures.
+Committed orders and inventory survive process/container restart with the same DB.
+
+## Analytics
+
+### ANA-001 — Time window
+
+Both analytics GET endpoints require `from` and `to` timestamp query parameters;
+from<to is required. Match order orderedAt in the half-open interval [from,to).
+All confirmed orders are included; failed/uncommitted requests contribute nothing.
+There are no cancelled orders in this round. Aggregation observes one committed
+snapshot. No server time, locale date parsing or timezone conversion is permitted.
+Any count, quantity or revenue exceeding MAX_SAFE yields 409 NUMERIC_LIMIT.
+
+### ANA-002 — Revenue
+
+`GET /analytics/revenue?from=...&to=...&groupBy=product|category` requires groupBy.
+Returns `{groupBy,items:[{key,quantity,revenueMinor}]}`. For product, key is product
+ID; for category, key is the line's category snapshot. Sum quantity and exact
+lineTotalMinor over qualifying order lines. Include groups with at least one
+qualifying line even if revenue is zero; omit groups with no lines. Sort key
+ascending. No orders gives items `[]`. Do not recompute from current inventory.
+
+### ANA-003 — Top sellers
+
+`GET /analytics/top-products?from=...&to=...&limit=...` returns
+`{items:[{productId,quantity,revenueMinor}]}`. limit defaults 10, range 1..1000.
+Use the same per-product aggregation; order quantity descending, revenueMinor
+descending, productId ascending; apply limit after aggregation/sorting. Empty
+window returns items `[]`. Zero-price sales are still sales.
+
+## Streaming product import
+
+### IMP-001 — Transport and limits
+
+`POST /imports/products` accepts only `application/x-ndjson` (optional UTF-8
+charset). Each physical LF-delimited line is one complete Product JSON object;
+CRLF is accepted by removing its terminating CR. Last nonempty line may omit LF.
+An empty body is a valid zero-record import. A terminal LF is not an additional
+blank line; internal/leading blank lines and BOM are INVALID_JSON. JSON escaping
+is allowed but literal embedded newlines split records. Arbitrary network chunk
+boundaries, including split UTF-8 sequences, MUST work without Content-Length.
+
+Candidates MUST support up to 2,147,483,648 body bytes, 2,000,000 records and
+4096 bytes per physical line excluding LF but including any CR. Exceeding any
+limit yields 413 INPUT_LIMIT (line for record/line limits, null for body limit).
+Candidates SHOULD keep input buffering bounded independently of body size; staging
+in candidate-owned disk/SQLite is permitted. Atomicity does not require buffering
+all records in RAM. Full memory/large-body behavior is a performance/resource test,
+not something the fast functional suite pretends to establish.
+
+### IMP-002 — Records
+
+Every record MUST satisfy the complete Product schema and DATA-001 bounds.
+Malformed/blank JSON is 400 INVALID_JSON with line; invalid Product fields are
+400 VALIDATION_ERROR with line. All fields, including inventory and popularity,
+are required. Products may be active/discontinued or zero price/stock. SKU and ID
+are compared exactly. Input ordering is arbitrary and MUST NOT affect catalogue
+ordering. Do not require sequential imported IDs or fixture-generated SKUs.
+
+### IMP-003 — Atomicity
+
+The whole import MUST be one atomic logical operation: success is 200 exactly
+`{imported:N}` after durable commit; any invalid late line, conflict, storage error
+or request-body disconnect before completion rolls back every record. No partial
+success. Concurrent reads see all or none of the imported set. An empty import
+returns imported=0. A disconnect after commit has the common uncertain-response
+semantics; imports provide no replay token.
+
+### IMP-004 — Conflicts and retries
+
+Existing or earlier-in-stream duplicate ID **or** SKU yields 409 IMPORT_CONFLICT
+at the offending line, with no changes. No upserts/last-wins semantics. Under
+concurrent conflicting imports at most one may commit. Retrying an identical
+successful import conflicts and MUST NOT create additional products. Distinct
+IDs with equal names are valid. A failed import may be retried after correction.
+
+## Deterministic demand simulation
+
+### SIM-001 — Inputs
+
+`POST /analytics/demand-simulation` accepts exactly `{seed,days,scenarios,products}`.
+seed is uint32 [0,4294967295], days 1..3650, scenarios 1..1,000,000, products
+1..1024 distinct objects exactly `{productId,initialStock,demandMax,reorderPoint,
+replenishmentQuantity,leadDays}`. Bounds: initialStock/reorderPoint 0..1,000,000,000;
+demandMax 0..1000; replenishmentQuantity 0..1,000,000; leadDays 1..30. Duplicate
+product IDs and productCount*days*scenarios>4,000,000,000 yield 400 VALIDATION_ERROR
+before computation. These bounds are mandatory supported ranges, not suggestions.
+Check product references in sorted ID order, including inactive products (allowed);
+missing is 404 PRODUCT_NOT_FOUND. All simulation state comes from the explicit
+parameters, not current stock. Normalize products to ascending product ID before
+assigning zero-based ordinal p. Scenarios s and days d are zero-based.
+
+### SIM-002 — Counter-addressed random word
+
+All shifts below are logical unsigned shifts. `u32(x)` means x modulo 2^32 in
+[0,2^32-1]; `mul32` takes the low 32 bits of the mathematical integer product.
+XOR operates on 32 bits. Constants are hexadecimal unsigned words.
+
+```
+x = seed XOR mul32(p+1, 0x9e3779b9)
+         XOR mul32(s+1, 0x85ebca6b)
+         XOR mul32(d+1, 0xc2b2ae35)
+x = x XOR (x >>> 16)
+x = mul32(x, 0x85ebca6b)
+x = x XOR (x >>> 13)
+x = mul32(x, 0xc2b2ae35)
+x = x XOR (x >>> 16)
+r = u32(x)
+demand = r modulo (demandMax+1)
+```
+
+There is exactly one addressed word per (p,s,d), even when demandMax=0. There is
+no global state, rejection resampling, warm-up draw or dependence on request
+execution order. The uniform word's modulo bias is intentional; do not replace it
+with another distribution. This is a specified synthetic non-cryptographic
+counter hash, not a claim of independent/cryptographic random samples. Counter
+compression to 32 bits permits collisions. Changing the product set may change
+ordinals/draws; permuting an unchanged set MUST NOT change results.
+
+### SIM-003 — Per-scenario daily state
+
+Each scenario/product starts independently with stock=initialStock, no outstanding
+replenishment and zero counters. For day d, in this **exact** order:
+
+1. Receive the sole outstanding replenishment if its scheduled arrival equals d:
+   add replenishmentQuantity to stock and replenishedUnits, clear outstanding.
+2. If stock<=reorderPoint, replenishmentQuantity>0 and no outstanding order, schedule
+   one arrival at d+leadDays. Only one replenishment may be outstanding. Scheduling
+   is **before demand**; leadDays>=1 prevents a newly scheduled same-day receipt.
+3. Obtain the addressed demand. Sell min(stock,demand), subtract it from stock;
+   lost=demand-sold is unmet demand that day. Demand is lost, never backordered.
+   A stockout day means lost>0, not merely stock=0.
+4. Add demand/sold/lost to counters and add one stockout day if applicable.
+
+After the last day, do not receive pending arrivals or schedule extra days.
+Ending stock is the remaining stock then. Inventory may exceed the reorder point;
+there is no warehouse capacity cap in the hypothetical simulation. Replenishment
+is a fixed order quantity, not an order-up-to policy.
+
+### SIM-004 — Output and exact rounding
+
+Return 200 `{seed,days,scenarios,logicalProductDays,items}` where logicalProductDays
+is P*days*scenarios and items are ascending product ID. Each item has productId,
+demandedUnits, soldUnits, lostUnits, replenishedUnits, stockoutDays,
+endingStockUnitsSum, meanEndingStockMilli and fillRateBps. Sum counters and final
+stock over scenarios **for that product**, never across products.
+
+For nonnegative integers, half-up rounding of n/d is
+`floor((2*n+d)/(2*d))`. meanEndingStockMilli is half-up of
+`1000*endingStockUnitsSum/scenarios`. fillRateBps is half-up of
+`10000*soldUnits/demandedUnits`, or 10000 when demandedUnits=0. No averaging of
+per-scenario ratios. Bounds ensure every returned integer is <=MAX_SAFE;
+if evaluated directly, intermediate rounding numerators require signed 64-bit
+or wider arithmetic (up to about 2.002e18). An exact quotient/remainder
+decomposition MAY avoid forming those numerators. No intermediate unsigned/signed wrap is allowed except
+inside the explicitly defined random-word arithmetic. Aggregate sums exactly,
+independent of parallel reduction order.
+
+### SIM-005 — Purity and memory
+
+Simulation MUST NOT mutate persistent products, inventory, customers or orders.
+Concurrent simulations of the same input MUST agree. No wall time/global PRNG or
+floating transcendental function may affect results. Implementations MAY
+parallelize scenarios/products; state is sequential across days of one trajectory.
+No per-day history appears in output. O(P) serial state or O(P*workerCount) state
+plus bounded lead-time queues is sufficient; implementations MUST NOT require
+fixture storage proportional to logicalProductDays. Fast paths and equivalent
+algorithms are allowed; no requirement forces literal iteration over zero demand.
+
+### SIM-006 — Profiles and golden vectors
+
+Small: P=2, days=4, scenarios=3 (24 logical operations), seed=12345.
+Medium: P=128, days=365, scenarios=1024 (47,841,280 operations), seed=12345.
+Large: P=256, days=365, scenarios=32768 (3,061,841,920 operations), seed=12345.
+Use the first P active fixture products in ID order, initialStock=40,
+demandMax=17, reorderPoint=12, replenishmentQuantity=50, leadDays=3. The tiny
+public fixture supports Small; Medium/Large use at least Medium fixtures.
+These performance profiles are separate from the diagnostic golden cases in
+`benchmark/fixtures/simulation-vectors.json`. Neither Medium nor Large executes
+in ordinary tests. The endpoint supports any valid input within SIM-001 bounds.
+
+The zero-demand analytical example with one product, stock=3, demandMax=0,
+reorderPoint=0, replenishmentQuantity=0, days=2, scenarios=2 returns demanded/sold/
+lost/replenished/stockoutDays=0, endingStockUnitsSum=6, meanEndingStockMilli=3000,
+fillRateBps=10000. For the day-one arrival example, seed=2 addresses words 2046853595 and
+1435501105 on days 0 and 1 respectively. With demandMax=1 both demands are 1. Starting at zero
+stock, day 0 schedules an arrival at day 1 and loses one unit. Day 1 receives
+one unit, schedules an arrival beyond the horizon, and sells one unit. Thus totals
+are demanded=2, sold=1, lost=1, replenished=1, stockoutDays=1, endingStock=0 and
+fillRateBps=5000. The half-up-tie vector separately exercises an exact .5 result.
+Golden random words and full examples are independently checked by a Python
+integer oracle and a TypeScript integer oracle; neither is an HTTP application.

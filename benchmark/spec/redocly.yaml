@@ -1,0 +1,5 @@
+extends:
+  - minimal
+rules:
+  # This benchmark deliberately specifies a local candidate, not a public SaaS API.
+  no-server-example.com: off
