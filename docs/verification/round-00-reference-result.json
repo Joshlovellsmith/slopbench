@@ -1,0 +1,266 @@
+{
+  "schemaVersion": "1",
+  "runId": "dfad4c7a-d7b7-4604-bac5-efe3bf3078d5",
+  "startedAt": "2026-10-29T02:32:20.653Z",
+  "finishedAt": "2026-10-29T02:32:33.055Z",
+  "experiment": {
+    "benchmark": {
+      "id": "slopshop-round-00",
+      "version": "0.1.0",
+      "contractHash": "470818aaf90788d7d3810e54dcf374261d38faf4a71fc3ff0de6dff916653e51"
+    },
+    "candidate": {
+      "id": "round0-reference",
+      "sourceHash": "fe222f84a2e99630eaa8de9c06d5e3c8a40c9fb005672769d772af7db2f14390",
+      "language": "typescript",
+      "runtime": "Bun 1.3.1"
+    },
+    "development": {},
+    "fixture": {
+      "schemaVersion": "1",
+      "generatorVersion": "1",
+      "seed": 12345,
+      "counts": {
+        "products": 12,
+        "customers": 4
+      },
+      "files": {
+        "products.jsonl": "ecd553312961905be1c37a1bed687941c15338d9d61e04a6b418b15d75245c75",
+        "customers.jsonl": "3d88edb72c445eea8bad22ff2f72936e8617aeb52677e5f2923ccc449c2296c4"
+      }
+    },
+    "environment": {
+      "platform": "linux",
+      "kernelRelease": "7.0.0-42-generic",
+      "cpuModel": "Intel(R) Core(TM) i5-14500T",
+      "logicalCpuCount": 20,
+      "hostMemoryBytes": 15896219648,
+      "architecture": "x64",
+      "controllerRuntime": "1.4.4",
+      "dockerVersion": "29.9.2",
+      "image": "oven/bun:1.3.1",
+      "imageId": "sha256:9c5d3c92b234b4708198577d2f39aab7397a242a40da7c2f059e51b9dc62b408",
+      "cpuLimit": 1,
+      "memoryLimitBytes": 268435456,
+      "executionTimeoutMs": 180000,
+      "readinessTimeoutMs": 10000,
+      "buildTimeoutMs": 60000,
+      "buildNetwork": "none"
+    },
+    "suite": {
+      "id": "round-00-public",
+      "version": "0.1.0"
+    }
+  },
+  "status": {
+    "state": "passed"
+  },
+  "tests": [
+    {
+      "status": "passed",
+      "name": "IMP-create-ordering-retry [IMP-002,IMP-004,CAT-003]",
+      "durationMs": 12.228
+    },
+    {
+      "status": "passed",
+      "name": "IMP-late-rollback [IMP-002,IMP-003]",
+      "durationMs": 5.553
+    },
+    {
+      "status": "passed",
+      "name": "IMP-duplicates [IMP-004]",
+      "durationMs": 4.435
+    },
+    {
+      "status": "passed",
+      "name": "IMP-wire-and-limits [GEN-003,IMP-001,IMP-002]",
+      "durationMs": 9.464
+    },
+    {
+      "status": "passed",
+      "name": "IMP-chunk-boundaries [IMP-001,IMP-002]",
+      "durationMs": 5.263
+    },
+    {
+      "status": "passed",
+      "name": "IMP-over-one-MiB-stream [IMP-001,IMP-003]",
+      "durationMs": 315.965
+    },
+    {
+      "status": "passed",
+      "name": "ANA-exact-aggregation [ANA-001,ANA-002,ANA-003]",
+      "durationMs": 21.111
+    },
+    {
+      "status": "passed",
+      "name": "ANA-id-tie-break [ANA-003]",
+      "durationMs": 2.955
+    },
+    {
+      "status": "passed",
+      "name": "ANA-empty-window [ANA-001,ANA-002,ANA-003,ORD-004]",
+      "durationMs": 2.655
+    },
+    {
+      "status": "passed",
+      "name": "ANA-validation [ANA-001,ANA-002,ANA-003]",
+      "durationMs": 18.846999999999998
+    },
+    {
+      "status": "passed",
+      "name": "ANA-empty-database [DATA-002,ANA-002,ANA-003]",
+      "durationMs": 2.655
+    },
+    {
+      "status": "passed",
+      "name": "CAT-defaults [CAT-001,CAT-003]",
+      "durationMs": 0.753
+    },
+    {
+      "status": "passed",
+      "name": "CAT-filters [CAT-002]",
+      "durationMs": 1.35
+    },
+    {
+      "status": "passed",
+      "name": "CAT-pagination-and-empty [CAT-001]",
+      "durationMs": 1.7810000000000001
+    },
+    {
+      "status": "passed",
+      "name": "CAT-sort-and-ties [CAT-003]",
+      "durationMs": 5.042
+    },
+    {
+      "status": "passed",
+      "name": "CAT-invalid-queries [GEN-003,CAT-001,CAT-002,CAT-003]",
+      "durationMs": 9.246
+    },
+    {
+      "status": "passed",
+      "name": "CAT-get-and-errors [CAT-004,GEN-005]",
+      "durationMs": 4.037
+    },
+    {
+      "status": "passed",
+      "name": "CAT-empty-initialization [DATA-001,DATA-002,CAT-001]",
+      "durationMs": 2.17
+    },
+    {
+      "status": "passed",
+      "name": "ORD-create-and-get [ORD-001,ORD-003,ORD-005]",
+      "durationMs": 16.595
+    },
+    {
+      "status": "passed",
+      "name": "ORD-invalid-items [ORD-001,GEN-001]",
+      "durationMs": 4.819
+    },
+    {
+      "status": "passed",
+      "name": "ORD-references-and-priority [ORD-002,GEN-004]",
+      "durationMs": 3.276
+    },
+    {
+      "status": "passed",
+      "name": "ORD-rollback-and-retry [ORD-004,ORD-005]",
+      "durationMs": 2.44
+    },
+    {
+      "status": "passed",
+      "name": "ORD-concurrent-stock [ORD-004,INV-003]",
+      "durationMs": 8.194999999999999
+    },
+    {
+      "status": "passed",
+      "name": "ORD-concurrent-id [ORD-005]",
+      "durationMs": 2.125
+    },
+    {
+      "status": "passed",
+      "name": "ORD-zero-and-numeric-limit [ORD-003,ORD-004]",
+      "durationMs": 5.105
+    },
+    {
+      "status": "passed",
+      "name": "ORD-dates [GEN-001,ORD-001]",
+      "durationMs": 1.7260000000000002
+    },
+    {
+      "status": "passed",
+      "name": "ORD-restart-durability [DATA-002,ORD-005]",
+      "durationMs": 393.486
+    },
+    {
+      "status": "passed",
+      "name": "ORD-storage-rollback [GEN-002,ORD-004]",
+      "durationMs": 4038.315
+    },
+    {
+      "status": "passed",
+      "name": "SIM-oracle-vectors [SIM-002,SIM-003,SIM-004,SIM-006]",
+      "durationMs": 23.927
+    },
+    {
+      "status": "passed",
+      "name": "SIM-http-golden [SIM-001,SIM-002,SIM-003,SIM-004,SIM-006]",
+      "durationMs": 23.296999999999997
+    },
+    {
+      "status": "passed",
+      "name": "SIM-permutation-and-purity [SIM-005,SIM-004]",
+      "durationMs": 2.7880000000000003
+    },
+    {
+      "status": "passed",
+      "name": "SIM-validation-and-references [SIM-001]",
+      "durationMs": 8.61
+    },
+    {
+      "status": "passed",
+      "name": "SIM-empty-reference [DATA-002,SIM-001]",
+      "durationMs": 3.5460000000000003
+    },
+    {
+      "status": "passed",
+      "name": "SIM-inactive-is-valid [SIM-001,SIM-005]",
+      "durationMs": 1.1520000000000001
+    },
+    {
+      "status": "passed",
+      "name": "INV-read-and-adjust [INV-001,INV-002,CAT-004]",
+      "durationMs": 4.31
+    },
+    {
+      "status": "passed",
+      "name": "INV-boundaries [INV-002]",
+      "durationMs": 4.186999999999999
+    },
+    {
+      "status": "passed",
+      "name": "INV-race [INV-003,GEN-004]",
+      "durationMs": 6.764
+    },
+    {
+      "status": "passed",
+      "name": "INV-validation [INV-001,INV-002,GEN-001]",
+      "durationMs": 4.67
+    },
+    {
+      "status": "passed",
+      "name": "INV-wire-errors [GEN-001,GEN-002,GEN-003]",
+      "durationMs": 3.411
+    }
+  ],
+  "correctness": {
+    "passed": 39,
+    "failed": 0
+  },
+  "metrics": {},
+  "container": {},
+  "artifacts": {
+    "stdout": "/home/admin/projects/slopbench/runs/dfad4c7a-d7b7-4604-bac5-efe3bf3078d5/public.stdout.log",
+    "stderr": "/home/admin/projects/slopbench/runs/dfad4c7a-d7b7-4604-bac5-efe3bf3078d5/public.stderr.log",
+    "buildLog": "/home/admin/projects/slopbench/runs/dfad4c7a-d7b7-4604-bac5-efe3bf3078d5/build.log"
+  }
+}

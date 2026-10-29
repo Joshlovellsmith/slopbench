@@ -1,4 +1,8 @@
-# Round 0 design verification
+# Round 0 design verification (Task 2 historical record)
+
+Task 3 subsequently implemented the reference and passed all 39 cases without
+skips. See [current verification and freeze evidence](task-3-verification.md).
+The statements and counts below describe the earlier design-only baseline.
 
 Verified with Bun 1.4.4, TypeScript 5.9.3, Python 3.14.4, Redocly CLI 2.72.0,
 Ajv 8.20.0 and ajv-formats 3.0.1. No conforming Round 0 application exists in this

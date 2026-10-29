@@ -220,28 +220,22 @@ Do not create a directory misleadingly described as secure merely because its na
 
 ## Current development stage
 
-**Round 0 contract design and public acceptance suite.**
+**Round 0 reference verification and public contract freeze (0.1.0).**
 
-Milestone 1 infrastructure is complete. Round 0 now has a public specification
-and tests; no SlopShop application is implemented here. The original foundation
-objectives were:
+Milestone 1 infrastructure and the Round 0 specification/public suite are complete.
+A standalone TypeScript/Bun reference now implements SlopShop and passes all 39
+public cases in Docker, including empty initialization, restart durability and
+externally injected SQLite write failure. It is an infrastructure reference,
+not an AI-generated experimental submission or evidence about language rankings.
+The original `examples/reference` remains the Milestone 1 smoke probe.
 
-- Establish the repository structure.
-- Define versioned fixture formats.
-- Implement deterministic synthetic data generation.
-- Define the common measurement and results schemas.
-- Implement a minimal language-independent candidate runner.
-- Provide a complete automated smoke test.
-
-The SlopShop application, hidden evaluation implementation, saturation load generator, model orchestration and leaderboard UI remain deferred.
-
-The foundation proves that a candidate can be started, exercised, measured and
-reported against reproducible data. Round 0 extends the external contract and
-public acceptance cases while leaving candidate implementation to a separate task.
+Hidden evaluation, a saturation load generator, model orchestration and a
+leaderboard remain deferred. The saturation workload document is a design only.
 
 ## Project status
 
-Experimental. The methodology, benchmark tasks and scoring system are subject to revision until the first formal benchmark version is published.
+Experimental. Methodology and future scoring remain subject to review. Published
+Round 0 contract 0.1.0 is frozen; changes require a separately versioned release.
 
 Do not interpret early development runs as scientifically validated language rankings.
 
@@ -302,8 +296,7 @@ The image used for verification was
 
 See the [verification report](docs/verification.md) for commands, outcomes, fixes
 and remaining isolation limitations. This is not a hermetic or hostile-code
-sandbox. The Round 0 contract and public tests are described below; no SlopShop
-application has been implemented.
+sandbox. The frozen Round 0 contract and its separate reference are described below.
 
 
 ## Round 0 specification and public tests
@@ -314,11 +307,15 @@ Start with the [language-neutral contract](benchmark/spec/round-00.md),
 catalogue reads, transactional inventory/orders, exact sales analytics, streaming
 product import and deterministic demand simulation. Candidate database layouts
 remain implementation choices. This repository supplies specifications, fixtures,
-tests and small numerical oracles, not an implementation of the application.
+tests, small numerical oracles and a separately isolated reference implementation.
 
 ```bash
 bun install --frozen-lockfile
 bun run round0:check
+# Requires the Docker image from the setup above; all 39 cases, no skips:
+bun run round0:reference-test
+bun run round0:verify-freeze
+# Discover tests without starting any candidate:
 bun run round0:test --discover
 # Once an independently implemented candidate is ready with the public fixture:
 bun run round0:test --domain catalogue --url http://CANDIDATE:8080
@@ -334,7 +331,19 @@ generator. Medium/Large simulation profiles never run automatically.
 [Requirement traceability](docs/round-00-traceability.md) maps every public test to
 published requirements, proposed private checks and performance families.
 [Design decisions](docs/round-00-design-decisions.md) record numerical conventions,
-fixture limitations and policies requiring review before freezing the experiment.
+fixture limitations and frozen numerical/business policies.
 
 [Round 0 verification](docs/round-00-verification.md) records what was validated
 and distinguishes discovered/skipped HTTP cases from actual acceptance passes.
+
+The reference controller creates six fresh domain databases plus an empty instance,
+each on its own internal Docker network. It retains validated JSON results, JUnit,
+logs and environment/cleanup audits under `runs/<run-id>`, with a SQLite index entry.
+`bun run slopbench report --latest` displays the result. It uses real SQLite lock
+contention for the storage-failure case; there are no candidate test backdoors.
+
+The immutable release file list and SHA-256 are recorded in
+[the contract freeze manifest](benchmark/spec/round-00.freeze.json). `round0:check`
+verifies it. Do not regenerate the hash to bless edits to this release; publish a
+separately versioned contract. The [Task 3 verification report](docs/task-3-verification.md)
+records observed results, the pre-freeze clarification and remaining limitations.

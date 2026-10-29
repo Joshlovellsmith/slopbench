@@ -194,7 +194,7 @@ from the Docker host itself. Host access, DNS, IPv6, bridge behavior and firewal
 rules need auditing on the target host. A candidate may still interact with
 reachable host services; use a dedicated host with no secrets/services. Controller
 HTTP is intentionally the only evaluation interface. No outbound dependencies
-are required by the reference. Dependency pulls/build network exceptions are
+are required by either reference. Dependency pulls/build network exceptions are
 explicit setup choices, never needed during the HTTP suite.
 
 Finally blocks clean normal success and failure paths, removing both containers,
@@ -222,4 +222,5 @@ snapshots and mounts. Only intentionally supplied data may cross the container
 boundary. Do not import hidden suites into this repository or rely on obscurity
 of filenames. Remote/multi-host execution and authenticated artifact transport
 are future integration work. There is no hidden suite, saturation workload,
-scoring/ranking system, dashboard or full SlopShop implementation here.
+scoring/ranking system or dashboard here. Task 3 separately adds the Round 0
+SlopShop reference; `examples/reference` remains this milestone's smoke probe.

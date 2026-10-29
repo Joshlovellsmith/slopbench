@@ -24,8 +24,7 @@ it does not implement or prove any SlopShop behavior.
 response deliberately differs from Round 0. Failing Round 0 tests against that
 probe would be expected candidate assertions, not benchmark infrastructure bugs.
 `bun run slopbench evaluate` still runs the Milestone 1 smoke suite; it is not a
-Round 0 controller. No language-specific launcher or new runtime abstraction has
-been added in this task.
+Round 0 controller. The standalone Round 0 reference controller described below runs the full suite.
 
 ## Candidate setup and isolated domains
 
@@ -88,9 +87,8 @@ bun run round0:test --all --targets benchmark-targets.json
 Main URLs must be distinct and refer to independent databases. URL aliases alone
 do not guarantee independent state; the external controller must ensure it.
 Omitted empty/control targets cause explicit skips; those runs do not establish
-full lifecycle/empty-data acceptance. No conforming application or controller
-hook exists in this repository yet. The suite is ready for them, but its entire
-HTTP acceptance pass cannot currently be claimed.
+full lifecycle/empty-data acceptance. The included reference/controller now exercise every target, including the empty
+fixture and both lifecycle cases, without skips.
 
 For direct Bun use, environment variables are `ROUND0_DOMAIN`, `ROUND0_BASE_URL`,
 optional `ROUND0_EMPTY_URL` and `ROUND0_CONTROL_URL`, or `ROUND0_TARGETS` pointing
@@ -116,7 +114,7 @@ The optional `controlUrl` supports three POST actions, no body, response 204:
 * `/storage-failure-off`: remove that condition and wait for normal writes/reads
   to become possible again.
 
-This defines a narrow evaluator hook interface, not an implementation. A separate
+This defines a narrow evaluator hook interface. A separate
 private evaluator can use its own local process/storage orchestration to fulfill
 it or express the same cases without an HTTP controller. There is no reset
 endpoint in SlopShop. Mismatched-fixture startup and crash recovery strategies
@@ -145,4 +143,39 @@ Result/Outcome v1 schema, benchmark `slopshop-round-00` version `0.1.0` and suit
 `round-00-public` version `0.1.0`. Preserve missing measurements as absent. Startup,
 infrastructure and candidate assertion failure classifications stay distinct.
 Do not persist a claim of a passed complete suite from discovery/skipped tests.
-This task does not implement a second result protocol or duplicate the run index.
+The reference controller reuses the shared validator and run index. Case duration
+is `durationMs`; single-request `latencyMs`/`httpStatus` are absent for multi-request
+cases. A missing measurement is never replaced by zero.
+
+## Included reference and freeze
+
+```bash
+# Explicit network setup if this image is not already present:
+docker pull oven/bun:1.3.1
+bun run round0:reference-test
+bun run slopbench report --latest
+bun run round0:verify-freeze
+```
+
+`examples/round0-reference` uses only Bun/Node standard libraries and SQLite.
+`benchmark/scripts/reference.ts` builds/starts it through its candidate manifest
+inside Docker; no candidate-defined command runs on the host. Six domains get
+fresh data/directories/networks; a seventh empty instance serves the read-only
+empty cases. The orders controller binds exclusively to host loopback and holds
+an external SQLite `BEGIN IMMEDIATE` write lock for the failure case. Existing
+committed reads remain available. Restart keeps the same database and URL.
+
+The controller requires all 39 unique JUnit cases, with no skips, before recording
+full acceptance. Exit 0 means success, 1 means assertion failure, 2 means setup,
+execution, audit or cleanup failure. JSON results/index, JUnit and logs are retained
+in `runs/`. Supplemental reference checks audit raw HTTP parsing, SQLite identity,
+file mounts, permissions and network separation. These checks use Bun inside the
+reference container; they are reference-specific and are not adapters required of
+other languages. Other implementations use the language-independent `round0:test`
+HTTP entry point and their own external lifecycle controller.
+
+Contract 0.1.0 is frozen in `benchmark/spec/round-00.freeze.json`. Its SHA-256 covers
+the explicitly enumerated public bundle, including this setup document and the
+shared validators used by these tests. The verifier checks file additions as well
+as content changes within listed directories. A release change needs a new version;
+`--freeze` is a one-time maintainer operation that refuses to overwrite the record.

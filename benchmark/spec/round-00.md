@@ -7,6 +7,11 @@ that schemas cannot express. A contradiction is a specification defect, not
 permission to choose either behavior. Requirement identifiers remain stable;
 incompatible published changes require a new contract version.
 
+Release 0.1.0 is frozen. The exact public bundle and its SHA-256 are recorded in
+[round-00.freeze.json](round-00.freeze.json); `bun run round0:verify-freeze`
+checks it. Post-publication semantic or public-test changes require a separately
+versioned release, with the original freeze record retained.
+
 MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are normative requirement keywords.
 No storage schema, framework, dependency manager or programming language is
 prescribed. HTTP/JSON and durable SQLite storage are required.
@@ -297,6 +302,9 @@ All confirmed orders are included; failed/uncommitted requests contribute nothin
 There are no cancelled orders in this round. Aggregation observes one committed
 snapshot. No server time, locale date parsing or timezone conversion is permitted.
 Any count, quantity or revenue exceeding MAX_SAFE yields 409 NUMERIC_LIMIT.
+This check applies to every group formed by the requested aggregation, including
+groups excluded by a top-products limit. No extra grand total across independent
+groups is defined. Applying the limit MUST NOT conceal an overflowing group.
 
 ### ANA-002 — Revenue
 

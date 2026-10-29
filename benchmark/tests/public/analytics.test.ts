@@ -171,6 +171,28 @@ publicTest("ANA-validation", ["ANA-001", "ANA-002", "ANA-003"], async () => {
     `/analytics/top-products?${overflowWindow}`,
   ])
     await error("GET", route, {}, 409, "NUMERIC_LIMIT");
+  // ANA-001 applies before top-N: a valid zero-revenue group outranks the
+  // overflowing group by quantity, so LIMIT 1 must still report the overflow.
+  const free = product("p-94000041", { priceMinor: 0, inventory: 11000000 });
+  await importProducts([free]);
+  for (let i = 0; i < 11; i++)
+    await request("POST", "/orders", {
+      json: order(
+        `o-ana-free-${i}`,
+        [{ productId: free.id, quantity: 1000000 }],
+        {
+          orderedAt: "2027-01-01T00:00:00.000Z",
+        },
+      ),
+      status: 201,
+    });
+  await error(
+    "GET",
+    `/analytics/top-products?${overflowWindow}&limit=1`,
+    {},
+    409,
+    "NUMERIC_LIMIT",
+  );
 });
 publicTest(
   "ANA-empty-database",

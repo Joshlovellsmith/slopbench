@@ -13,7 +13,9 @@
     "round0:fixtures": "bun benchmark/scripts/fixtures.ts",
     "round0:generate-openapi": "bun benchmark/scripts/generate-openapi.ts",
     "round0:traceability": "bun benchmark/scripts/check-contract.ts --write",
-    "round0:check": "bun benchmark/scripts/generate-openapi.ts --check && bun benchmark/scripts/check-contract.ts && redocly lint --config benchmark/spec/redocly.yaml benchmark/spec/openapi.yaml && python3 benchmark/scripts/verify-vectors.py"
+    "round0:check": "bun benchmark/scripts/generate-openapi.ts --check && bun benchmark/scripts/check-contract.ts && redocly lint --config benchmark/spec/redocly.yaml benchmark/spec/openapi.yaml && python3 benchmark/scripts/verify-vectors.py && bun run round0:verify-freeze",
+    "round0:reference-test": "bun benchmark/scripts/reference.ts",
+    "round0:verify-freeze": "bun benchmark/scripts/freeze.ts"
   },
   "dependencies": {
     "zod": "4.1.12"

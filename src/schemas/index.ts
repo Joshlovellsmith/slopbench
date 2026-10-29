@@ -58,19 +58,26 @@ export const outcomeSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("passed"),
     name: z.string(),
-    latencyMs: measurement,
-    httpStatus: count,
+    // A case may span many requests; these are present only for a single measured request.
+    latencyMs: measurement.optional(),
+    httpStatus: count.optional(),
+    durationMs: measurement.optional(),
   }),
   z.object({
     status: z.literal("failed"),
     name: z.string(),
     latencyMs: measurement.optional(),
     httpStatus: count.optional(),
+    durationMs: measurement.optional(),
     message: z.string(),
   }),
 ]);
 export const experimentSchema = z.object({
-  benchmark: z.object({ id: z.string(), version: z.string() }),
+  benchmark: z.object({
+    id: z.string(),
+    version: z.string(),
+    contractHash: hash.optional(),
+  }),
   candidate: z.object({
     id: z.string(),
     sourceHash: hash,
